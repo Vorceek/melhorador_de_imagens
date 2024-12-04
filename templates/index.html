@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload e Processamento de Imagem</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #849eeb;
+            margin: 0;
+        }
+
+        .upload-container {
+            border: 2px dashed #000000;
+            padding: 20px;
+            text-align: center;
+            width: 300px;
+            height: 300px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s ease;
+        }
+
+        .upload-container:hover {
+            border-color: #4768ca;
+        }
+
+        .upload-container input[type="file"] {
+            display: none;
+        }
+
+        .upload-container label {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #0040FF;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #drop-zone {
+            padding: 20px;
+            height: 170px;
+            margin-top: 15px;
+            border: 2px dashed #999;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        #drop-zone p {
+            color: #555;
+        }
+
+        #drop-zone.dragover {
+            border-color: #0040FF;
+            background-color: #e8f5e9;
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <label for="file">Clique para selecionar uma imagem ou arraste a imagem aqui</label>
+        <input type="file" id="file" name="file" onchange="uploadFile()" />
+        <div id="drop-zone" ondrop="handleDrop(event)" ondragover="allowDrop(event)">
+            <p>Ou arraste e solte a imagem aqui</p>
+        </div>
+    </div>
+
+    <script>
+        function allowDrop(event) {
+            event.preventDefault();
+            document.getElementById("drop-zone").classList.add("dragover");
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            document.getElementById("drop-zone").classList.remove("dragover");
+            const file = event.dataTransfer.files[0];
+            document.getElementById('file').files = event.dataTransfer.files;
+            uploadFile(file);
+        }
+
+        function uploadFile() {
+            const inputFile = document.getElementById('file');
+            const file = inputFile.files[0];
+
+            if (file) {
+                const formData = new FormData();
+                formData.append("file", file);
+
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.blob())
+                .then(blob => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = "imagem_processada.png";
+                    link.click();
+                })
+                .catch(error => {
+                    console.error('Erro ao enviar o arquivo:', error);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
